@@ -4,7 +4,7 @@
 \alias{tbv_round}
 \title{Table rounding}
 \usage{
-tbv_round(x, max_decimals = 2, big.mark = ",")
+tbv_round(x, max_decimals = 2, big_mark = ",")
 }
 \arguments{
 \item{x}{a vector of numeric values}
@@ -12,9 +12,9 @@ tbv_round(x, max_decimals = 2, big.mark = ",")
 \item{max_decimals}{an integer value that will determine the maximum
 number of decimals in the output. Larger numbers will not use the
 maximum number of decimals in order to maintain the same, or at
-similar length as smaller numbers.}
+least similar length as smaller numbers.}
 
-\item{big.mark}{a character value used to separate number groups to the
+\item{big_mark}{a character value used to separate number groups to the
 left of the decimal point. See \link{prettyNum} for more details on this.
 Set this input to '' to negate it's effect.}
 }

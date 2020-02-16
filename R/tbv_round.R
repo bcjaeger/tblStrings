@@ -14,6 +14,12 @@
 
 }
 
+safe_nsmall <- function(x){
+  x <- max(x, 0)
+  x <- min(x, 20)
+  x
+}
+
 is_empty <- function (x) length(x) == 0
 
 #' Table rounding
@@ -23,9 +29,9 @@ is_empty <- function (x) length(x) == 0
 #' @param max_decimals an integer value that will determine the maximum
 #'   number of decimals in the output. Larger numbers will not use the
 #'   maximum number of decimals in order to maintain the same, or at
-#'   similar length as smaller numbers.
+#'   least similar length as smaller numbers.
 #'
-#' @param big.mark a character value used to separate number groups to the
+#' @param big_mark a character value used to separate number groups to the
 #'   left of the decimal point. See [prettyNum] for more details on this.
 #'   Set this input to '' to negate it's effect.
 #'
@@ -41,7 +47,7 @@ is_empty <- function (x) length(x) == 0
 #' tbv_round( c(0.1234, 1.234, 12.34, 123.4, 1234) )
 #'
 
-tbv_round <- function (x, max_decimals = 2, big.mark = ',') {
+tbv_round <- function (x, max_decimals = 2, big_mark = ',') {
 
   if (is_empty(x)) return("NA")
 
@@ -67,7 +73,7 @@ tbv_round <- function (x, max_decimals = 2, big.mark = ',') {
   # the breaks are based on rounded x instead of x itself
   x_brks <- c(0, 9.995, 99.95, Inf)
 
-  # the cuts create boundary categories for rounding
+  # x_cuts create boundary categories for rounding
   x_cuts <- cut(
     x_abs,
     breaks = x_brks,
@@ -83,20 +89,17 @@ tbv_round <- function (x, max_decimals = 2, big.mark = ',') {
   i_0 <- which(i == 0)
 
   if (!is_empty(i_2)){
-    out[i_2] <- format(.round(x[i_2], max_decimals),
-      nsmall = max_decimals, big.mark = big.mark
-    )
+    out[i_2] <- format(.round(x[i_2], max_decimals), justify = 'c',
+      nsmall = safe_nsmall(max_decimals), big.mark = big_mark)
   }
 
   if (!is_empty(i_1))
-    out[i_1] <- format(.round(x[i_1], max_decimals - 1),
-      nsmall = max_decimals - 1, big.mark = big.mark
-    )
+    out[i_1] <- format(.round(x[i_1], max_decimals - 1), justify = 'c',
+      nsmall = safe_nsmall(max_decimals - 1), big.mark = big_mark)
 
   if (!is_empty(i_0))
-    out[i_0] <- format(.round(x[i_0], max_decimals - 2),
-      nsmall = max_decimals - 2, big.mark = big.mark
-    )
+    out[i_0] <- format(.round(x[i_0], max_decimals - 2), justify = 'c',
+      nsmall = safe_nsmall(max_decimals - 2), big.mark = big_mark)
 
   trimws(out)
 
