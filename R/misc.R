@@ -17,7 +17,7 @@ brac_label   <- function(x) attr(x, 'brac_label')
 gap_label    <- function(x) attr(x, 'gap_label')
 point_label  <- function(x) attr(x, 'point_label')
 error_label  <- function(x) attr(x, 'error_label')
-ref_val      <- function(x) attr(x, 'ref_val')
+ref_value    <- function(x) attr(x, 'ref_value')
 ref_label    <- function(x) attr(x, 'ref_label')
 
 validate_proportion <- function(x, label = 'x'){

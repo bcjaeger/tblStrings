@@ -145,7 +145,9 @@ pointGap <- function(point,
   brac_right = ')',
   brac_middle = ', ',
   max_decimals = 2,
-  big_mark = ','
+  big_mark = ',',
+  ref_label = 'ref',
+  ref_value = 0
 ) {
   validate_pointGap(point = point,
     lower = lower,
@@ -205,19 +207,30 @@ validate_pointGap <- function(point, lower, upper) {
 
 # Formatting  ----
 
-#' Print point gaps
+#' Printing table strings
 #'
-#' @description Shows the values that will be printed in
-#'   tables or figures when a `pointGap` object is included.
+#' @description `tblString`objects are printed with some guiding principles.
 #'
-#' @param x an object of type `'pointGap'`
+#'   1. Numbers should be roughly the same width
+#'
+#'   2. Numbers should be rounded based on their magnitude, not based
+#'      on a uniform rule.
+#'
+#'   3. Data should be spaced appropriately, not smushed together.
+#'
+#'   4. Accents based on significance or effect size should be easy
+#'      to implement and automated when useful.
+#'
+#' @param x an object to print
 #'
 #' @param ... not currently used
 #'
 #' @return printed output in the console window
 #'
 #' @method format tblStrings_pointGap
+#'
 #' @export
+#'
 #' @export format.tblStrings_pointGap
 #'
 #' @examples
@@ -233,17 +246,30 @@ validate_pointGap <- function(point, lower, upper) {
 format.tblStrings_pointGap <- function(x, ...) {
 
   .dat <- vctrs::vec_data(x) %>%
-    chr_to_dbl() %>%
+    chr_to_dbl()
+
+  ref_indices <- .dat %>%
+    lapply(function(.x) .x == ref_value(x)) %>%
+    do.call(cbind, .) %>%
+    apply(1, all)
+
+  .dat <- .dat %>%
     lapply(tbv_round,
       max_decimals = max_decimals(x),
       big_mark = big_mark(x)
     )
 
-  paste0(
+  output <- paste0(
     .dat[[1]], ' ',  brac_left(x),
     .dat[[2]], brac_middle(x),
     .dat[[3]], brac_right(x)
   )
+
+  if(any(ref_indices, na.rm = TRUE)) output[which(ref_indices)] <- paste0(
+    ref_value(x), ' ', brac_left(x), ref_label(x), brac_right(x)
+  )
+
+  output
 
 }
 
@@ -392,7 +418,7 @@ vec_proxy_compare.tblStrings_pointGap <- function(x, ...) {
 vec_math.tblStrings_pointGap <- function(.fn, .x, ...) {
 
   # get character strings from x
-  vctrs::vec_data(.x) %>%
+  output <- vctrs::vec_data(.x) %>%
     # convert to numeric data
     chr_to_dbl() %>%
     # apply operations to point/lower/upper, separately
@@ -401,6 +427,11 @@ vec_math.tblStrings_pointGap <- function(.fn, .x, ...) {
     as_pointGap() %>%
     # restore the original attributes
     vctrs::vec_restore(to = .x)
+
+  attr(output, 'ref_value') <-
+    vctrs::vec_math_base(.fn, .x = ref_value(.x), ...)
+
+  output
 
 }
 
