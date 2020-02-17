@@ -25,9 +25,7 @@ new_pval <- function(
 }
 
 
-#' P-value
-#'
-#' @description P-values are created based on probability inputs.
+#' @describeIn pointGap
 #'
 #' @param x a numeric value or vector with values greater than 0
 #'   and less than 1.

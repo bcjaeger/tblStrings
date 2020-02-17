@@ -18,6 +18,7 @@ if(getRversion() >= "2.15.1")
 # roxygen namespace tags. Modify with care!
 ## usethis namespace: start
 #' @importFrom rlang %||%
+#' @importFrom magrittr %<>% %>%
 #' @importFrom tibble tibble
 #' @importFrom vctrs
 #'   vec_ptype_abbr
@@ -36,6 +37,5 @@ if(getRversion() >= "2.15.1")
 #'   vec_ptype2.integer
 #'   obj_print_data
 #'
-#' @importFrom zeallot %<-%
 ## usethis namespace: end
 NULL

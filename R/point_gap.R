@@ -22,6 +22,8 @@ new_pointGap <- function(
   vctrs::vec_assert(upper, numeric())
 
   # attributes
+  vctrs::vec_assert(point_label,  character())
+  vctrs::vec_assert(gap_label,    character())
   vctrs::vec_assert(brac_left,    character())
   vctrs::vec_assert(brac_right,   character())
   vctrs::vec_assert(brac_middle,  character())
@@ -39,8 +41,8 @@ new_pointGap <- function(
     # S3 class
     class = "tblStrings_pointGap",
     # attributes
-    point_label = "Estimate",
-    gap_label = "95% CI",
+    point_label  = point_label,
+    gap_label    = gap_label,
     label        = column_label,
     brac_left    = brac_left,
     brac_right   = brac_right,
@@ -56,35 +58,28 @@ new_pointGap <- function(
 methods::setOldClass(c("tblStrings_pointGap", "vctrs_vctr"))
 
 
-#' Point and gap values
+#' tblString vectors
 #'
 #' @description Scientific tables often include values of the form
 #'   estimate (lower value, upper value). It is somewhat tedious to work
 #'   with these values in R because to do so, one will usually have to
 #'   round their numbers evenly, then paste them into whatever bracket
 #'   notation is required by their target journal, and then struggle to
-#'   work with the resulting character strings because they can no longer
-#'   access the numeric data. Point gap `pointGap` vectors are meant
+#'   work with the resulting character strings because they can't treat
+#'   the character values as numeric. `tblString` vectors are meant
 #'   to make the  process of developing tables a little less painful.
-#'   For instance, `pointGap` vectors
-#'
-#'   - automatically format data into the standard point (gap) form.
-#'
+#'   The five core vector classes implemented are:
+#'   - `pointGap`: estimate (interval)
+#'   -`numPer`: count (percent)
+#'   -`PointErr`: estimate (error) or estimate +/- error
+#'   -`fraction`: numerator / denominator
+#'   -`pval`: p-values
+#' Each class has some helpful properties, e.g.
 #'   - automatically round numeric values based on magnitude so that
 #'     tabulated values will have more or less the same width.
-#'
-#'   - contain underlying numeric data that allows you to sort `pointGap`
-#'     vectors or develop conditional formatting based on gap coverage.
-#'
-#' @note Although `pointGap` objects contain numeric data, only the first 15
-#'   figures in the numeric values are retained. (this is because the data
-#'   are converted to a string of characters). Accuracy beyond this level
-#'   of precision should not be expected, but should also not be needed
-#'   in most tabular summaries. The reason `pointGap` values keep this
-#'   structure instead of the more flexible record style format (see
-#'   [vctrs::rcrd]) is that record style objects are not easily passed
-#'   into tabulation functions such as [flextable::flextable] and
-#'   [knitr::kable].
+#'   - contain underlying numeric data that allows you to sort table
+#'     values or develop conditional formatting based on vector properties
+#'     (e.g., [pg_covers] for `pointGap` values.).
 #'
 #' @param point numeric vector of point estimates
 #'
@@ -92,20 +87,17 @@ methods::setOldClass(c("tblStrings_pointGap", "vctrs_vctr"))
 #'
 #' @param upper numeric vector of upper-bounds.
 #'
-#' @param point_label character value describing the point value. Default
-#'   is "Estimate".
+#' @param point_label character value describing the point value.
 #'
 #' @param gap_label character value describing what goes inside of the
-#'   gap. Default is "95% CI".
+#'   gap.
 #'
-#' @param brac_left character vector with values that will become the left
-#'   closing bracket in the point gap value.
+#' @param brac_left character value that will close brackets from the left.
 #'
-#' @param brac_right character vector with values that will become the right
-#'   closing bracket in the point gap value.
+#' @param brac_right character value that will close brackets from the right.
 #'
-#' @param brac_middle character vector with values that will become the text
-#'   separating lower and upper bound estimates.
+#' @param brac_middle character value that will separate values inside of
+#'   the bracket.
 #'
 #' @param max_decimals an integer value that will determine the maximum
 #'   number of decimals in the output. Larger numbers will not use the
@@ -116,7 +108,24 @@ methods::setOldClass(c("tblStrings_pointGap", "vctrs_vctr"))
 #'   left of the decimal point. See [prettyNum] for more details on this.
 #'   Set this input to '' to negate it's effect.
 #'
-#' @return point gap (`pointGap`) value(s).
+#' @param ref_label a character value used to describe the referent group
+#'  (if there is a referent group).
+#'
+#' @param ref_value a numeric value that is assumed for the referent group.
+#'   For example, in logistic regression, the referent group is often
+#'   included in results with a referent odds ratio of 1.
+#'
+#' @return `pointGap` value(s).
+#'
+#' @note Although `tblStrings` objects contain numeric data, only the first 15
+#'   figures in the numeric values are retained. (this is because the data
+#'   are converted to a character strings). Accuracy beyond this level
+#'   of precision should not be expected, but should also not be needed
+#'   in most tabular summaries. The reason `tblStrings` values keep this
+#'   structure instead of the more flexible record style format (see
+#'   [vctrs::new_rcrd]) is that record style objects are not easily passed
+#'   into tabulation functions such as [flextable::flextable] and
+#'   [knitr::kable].
 #'
 #' @seealso as_pointGap
 #'
@@ -136,9 +145,10 @@ methods::setOldClass(c("tblStrings_pointGap", "vctrs_vctr"))
 #'
 #'
 
-pointGap <- function(point,
-  lower,
-  upper,
+pointGap <- function(
+  point = numeric(),
+  lower = numeric(),
+  upper = numeric(),
   point_label = "Estimate",
   gap_label = "95% CI",
   brac_left = '(',
@@ -149,9 +159,7 @@ pointGap <- function(point,
   ref_label = 'ref',
   ref_value = 0
 ) {
-  validate_pointGap(point = point,
-    lower = lower,
-    upper = upper)
+  validate_pointGap(point = point, lower = lower, upper = upper)
 
   point <- vctrs::vec_cast(point, double())
   lower <- vctrs::vec_cast(lower, double())
@@ -207,19 +215,15 @@ validate_pointGap <- function(point, lower, upper) {
 
 # Formatting  ----
 
-#' Printing table strings
+#' tblString formats
 #'
 #' @description `tblString`objects are printed with some guiding principles.
 #'
-#'   1. Numbers should be roughly the same width
+#'   - table values should be rounded based on their magnitude,
+#'     not based on a uniform number of rounding digits.
 #'
-#'   2. Numbers should be rounded based on their magnitude, not based
-#'      on a uniform rule.
+#'   - data should be spaced appropriately, not smushed together.
 #'
-#'   3. Data should be spaced appropriately, not smushed together.
-#'
-#'   4. Accents based on significance or effect size should be easy
-#'      to implement and automated when useful.
 #'
 #' @param x an object to print
 #'
@@ -462,9 +466,9 @@ vec_arith.tblStrings_pointGap.tblStrings_pointGap <- function(op,x,y,...){
 
 #' Coverage
 #'
-#' @description Determining whether a gap covers a value. `covers`
+#' @description Determining whether a gap covers a value. `pg_covers`
 #'   will determine whether a gap contains a given `value`. The
-#'   negation function, `omits`, will indicate whether a gap does
+#'   negation function, `pg_omits`, will indicate whether a gap does
 #'   not contain a given `value`.
 #'
 #' @param x a `pointGap` object or an object that can be coerced into
@@ -490,15 +494,15 @@ vec_arith.tblStrings_pointGap.tblStrings_pointGap <- function(op,x,y,...){
 #'
 #' p <- pointGap(1, 0, 2)
 #'
-#' covers(p, value = c(1, 2, 3))
-#' omits(p, value = c(1, 2, 3))
+#' pg_covers(p, value = c(1, 2, 3))
+#' pg_omits(p, value = c(1, 2, 3))
 #'
-#' covers(p, value = c(1, 2, 3), strict_coverage = FALSE)
-#' omits(p, value = c(1,2,3), strict_omission = TRUE)
+#' pg_covers(p, value = c(1, 2, 3), strict_coverage = FALSE)
+#' pg_omits(p, value = c(1,2,3), strict_omission = TRUE)
 #'
 #' @export
 
-covers <- function(x, value, strict_coverage = TRUE){
+pg_covers <- function(x, value, strict_coverage = TRUE){
 
   if(!is_pointGap(x))
     stop("x must be a vector of type <tblStrings_pointGap>.",
@@ -516,10 +520,10 @@ covers <- function(x, value, strict_coverage = TRUE){
 
 }
 
-#' @rdname covers
+#' @rdname pg_covers
 #' @export
-omits <- function(x, value, strict_omission = FALSE){
-  !covers(x=x, value=value, strict_coverage = !strict_omission)
+pg_omits <- function(x, value, strict_omission = FALSE){
+  !pg_covers(x=x, value=value, strict_coverage = !strict_omission)
 }
 
 
@@ -528,8 +532,8 @@ omits <- function(x, value, strict_omission = FALSE){
 #'
 #' @description Multiplying a point-gap by negative 1 is sometimes
 #'   useful, but `pointGap` objects won't let you multiply them like that.
-#'   Instead, use `flip()` which will automatically switch the upper and
-#'   lower bounds of the gap so it covers the same numbers multiplied
+#'   Instead, use `pg_flip()` which will automatically switch the upper and
+#'   lower bounds of the gap so it pg_covers the same numbers multiplied
 #'   by negative 1.
 #'
 #' @param x a point gap object (see [pointGap])
@@ -543,13 +547,13 @@ omits <- function(x, value, strict_omission = FALSE){
 #' ptr <- pointGap(2, 1, 4)
 #'
 #' # negate
-#' flip(ptr)
+#' pg_flip(ptr)
 #'
 #' # double negate = no change
-#' flip(flip(ptr))
+#' pg_flip(pg_flip(ptr))
 #'
 #'
-flip <- function(x){
+pg_flip <- function(x){
 
   if(!is_pointGap(x)) stop("x must be a vector of type <tblStrings_pointGap>.",
     "\nInstead, it has type <", typeof(x), '>', call. = FALSE)
@@ -566,32 +570,26 @@ flip <- function(x){
 
 }
 
-#' Point gap casting
+#' tblString casting
 #'
-#' @description Coerces object(s) into type `"pointGap"`.
+#' @description Coerces object(s) into `tblString` types.
 #'
-#' @param x object to be coerced. `x` can be a list with 3 elements or
-#'   a data.frame with 3 columns. The values of `x` should be ordered
-#'   as point, lower, and then upper values.
+#' @param x object to be coerced. Eligible object types are
 #'
-#' @return point gap (`pointGap`) value(s).
+#'  - `list`
+#'  - `matrix`
+#'  - `data.frame`
 #'
-#' @seealso pointGap
+#'  The values of `x` should be ordered in the same manner as the
+#'  inputs of the `tblString` type. For example, coercing a list
+#'  into a `pointGap` object would require the list to have three
+#'  elements in the order of point, lower, and upper values.
+#'
+#' @return a `tblString` vector.
 #'
 #' @export
 #'
-#' @note data in `x` must be numeric. Valid objects are:
-#'
-#'  - `vector` (length must = 3)
-#'  - `matrix` (ncol must = 3)
-#'  - `list` (length must = 3)
-#'  - `data.frame` (ncol must = 3)
-#'
-#' In each case,
-#'
-#'  - the first value or column is taken as point values
-#'  - the second value or column is taken as lower values
-#'  - the third value or column is taken as upper values
+#' @note data in `x` must be numeric.
 #'
 #' @examples
 #'
@@ -618,11 +616,12 @@ as_pointGap <- function(x) {
 
 
 
-#' Point gaps
+#' tblString inheritance
 #'
 #' @param x an object
 #'
 #' @return a logical vector of length equal to `x`
+#'
 #' @export
 #'
 #' @examples
@@ -641,10 +640,12 @@ is_pointGap <- function(x) {
 
 
 # vctr template:
+
 # Construction ---------------------------------------------------------------
 # Formatting -----------------------------------------------------------------
 # Casting --------------------------------------------------------------------
 # Coercion -------------------------------------------------------------------
 # Comparisons ----------------------------------------------------------------
 # Arithmetic -----------------------------------------------------------------
+# Math -----------------------------------------------------------------------
 # Front-end ------------------------------------------------------------------

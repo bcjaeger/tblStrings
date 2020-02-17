@@ -19,6 +19,8 @@ point_label  <- function(x) attr(x, 'point_label')
 error_label  <- function(x) attr(x, 'error_label')
 ref_value    <- function(x) attr(x, 'ref_value')
 ref_label    <- function(x) attr(x, 'ref_label')
+show_percent <- function(x) attr(x, 'show_percent')
+style        <- function(x) attr(x, 'style')
 
 validate_proportion <- function(x, label = 'x'){
 
@@ -61,19 +63,16 @@ mat_to_list <- function(x){
   lst
 }
 
-dbl_to_chr <- function(doubles){
-
-  # check doubles
-  lapply(doubles, vctrs::vec_assert, double())
+dbl_to_chr <- function(numerics){
 
   # check lengths
-  if(!all_equal(vapply(doubles, length, 1L)))
+  if(!all_equal(vapply(numerics, length, 1L)))
     stop("all arguments must be the same length", call. = FALSE)
 
   # concatenate vectors
-  do.call(what = base::c, args = doubles) %>%
+  do.call(what = base::c, args = numerics) %>%
     # form matrix (1 column for each vector)
-    matrix(byrow = FALSE, ncol = length(doubles)) %>%
+    matrix(byrow = FALSE, ncol = length(numerics)) %>%
     # collapse by row using '_' pattern
     apply(1L, paste, collapse = '_')
 
