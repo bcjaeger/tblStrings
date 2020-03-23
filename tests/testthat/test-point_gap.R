@@ -30,7 +30,8 @@ test_that(
       lower = y,
       upper = z,
       brac_left = '[',
-      brac_right = ']'
+      brac_right = ']',
+      ref_value = 1
     )
 
     expect_error(pointGap(0, 1, 0), 'lower values')
@@ -56,6 +57,9 @@ test_that(
         "1.00 [[0.90, 1.10]]"
       )
     )
+
+    expect_equal(as.character(pointGap(0, 0, 0)), '0 (ref)')
+    expect_equal(as.character(exp(pointGap(0, 0, 0))), '1 (ref)')
 
     # Casting ----
 
@@ -98,32 +102,32 @@ test_that(
     # coverage
 
     expect_equal(
-      covers(p[1:4], value = 0, strict_coverage = FALSE),
+      pg_covers(p[1:4], value = 0, strict_coverage = FALSE),
       c(TRUE, NA, FALSE, NA)
     )
 
     expect_equal(
-      covers(p[1:4], value = 0, strict_coverage = TRUE),
+      pg_covers(p[1:4], value = 0, strict_coverage = TRUE),
       c(FALSE, NA, FALSE, NA)
     )
 
     # correct inverse
 
     expect_equal(
-      covers(p[1:5], value = 0),
-      !omits(p[1:5], value = 0)
+      pg_covers(p[1:5], value = 0),
+      !pg_omits(p[1:5], value = 0)
     )
 
     # flipping
 
     expect_equal(
-      as.character(flip(p[1])),
+      as.character(pg_flip(p[1])),
       '-0.10 [[-0.20, 0.00]]'
     )
 
-    expect_error(covers(1, value = 1), 'has type')
+    expect_error(pg_covers(1, value = 1), 'has type')
 
-    expect_error(flip(1), 'has type')
+    expect_error(pg_flip(1), 'has type')
 
   }
 )

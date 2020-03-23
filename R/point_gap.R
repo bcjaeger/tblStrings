@@ -178,7 +178,9 @@ pointGap <- function(
     brac_right   = brac_right,
     brac_middle  = brac_middle,
     max_decimals = max_decimals,
-    big_mark     = big_mark
+    big_mark     = big_mark,
+    ref_label    = ref_label,
+    ref_value    = ref_value
   )
 
 }
@@ -513,10 +515,18 @@ pg_covers <- function(x, value, strict_coverage = TRUE){
 
   .x <- chr_to_dbl(vctrs::vec_data(x))
 
-  if(strict_coverage)
+  # a special case for referent values
+  refs <- do.call(cbind, .x) %>%
+    apply(1, function(x_row) all(x_row == value))
+
+  output <- if(strict_coverage)
     .x[[2]] <  value & .x[[3]] >  value
   else
     .x[[2]] <= value & .x[[3]] >= value
+
+  if(any(refs, na.rm = TRUE)) output[which(refs)] <- TRUE
+
+  output
 
 }
 
@@ -636,6 +646,32 @@ is_pointGap <- function(x) {
 }
 
 
+#' Reference labels
+#'
+#' @param x a point gap object (see [pointGap])
+#'
+#' @return a `pointGap` object with reference values replacing values
+#'   with all NA.
+#'
+#' @export
+#'
+pg_misRef <- function(x){
+
+  if(!is_pointGap(x)) stop("x must be a vector of type <tblStrings_pointGap>.",
+    "\nInstead, it has type <", typeof(x), '>', call. = FALSE)
+
+  all_miss_indx <- chr_to_dbl(vctrs::vec_data(x)) %>%
+    do.call(cbind, .) %>%
+    apply(1, function(row) all(is.na(row)))
+
+  x[all_miss_indx] <- rep(
+    pointGap(point = ref_value(x), lower = ref_value(x), upper = ref_value(x)),
+    sum(all_miss_indx)
+  )
+
+  x
+
+}
 
 
 
