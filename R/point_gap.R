@@ -464,6 +464,28 @@ vec_arith.tblStrings_pointGap.tblStrings_pointGap <- function(op,x,y,...){
   vec_arith.tblStrings_pointGap.default(op, x, y, ...)
 }
 
+#' @method vec_arith.tblStrings_pointGap numeric
+#' @export
+vec_arith.tblStrings_pointGap.numeric <- function(op, x, y, ...) {
+
+  .x <- chr_to_dbl(vctrs::vec_data(x))
+
+  list(
+    point = vctrs::vec_arith_base(op, .x[[1]], y),
+    lower = vctrs::vec_arith_base(op, .x[[2]], y),
+    upper = vctrs::vec_arith_base(op, .x[[3]], y)
+  ) %>%
+    as_pointGap() %>%
+    vctrs::vec_restore(to = x)
+
+}
+
+#' @export
+vec_arith.numeric.tblStrings_pointGap <- function(op, x, y, ...) {
+  vec_arith(op = op, x=y, y=x)
+}
+
+
 # Front-end ----
 
 #' Coverage

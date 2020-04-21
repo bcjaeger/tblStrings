@@ -1,4 +1,20 @@
 
+
+# test_that(
+#   "data frame behavior is correct",
+#   {
+#
+#     df <- data.frame(
+#       x = 1:10/10,
+#       y = 0:9 /10,
+#       z = 2:11/10
+#     )
+#
+#     df$pg = with(df, pointGap(x, y, z))
+#
+#   }
+# )
+
 test_that(
   "vector behavior is correct",
   {
@@ -96,6 +112,9 @@ test_that(
 
     expect_error(p[1] + p[2], class = 'vctrs_error_incompatible_op')
     expect_equal(as_pointGap(exp(mat)), pointGap(exp(x), exp(y), exp(z)))
+
+    # scaling
+    expect_equal(100 * p, p *100)
 
     # Front-end ----
 

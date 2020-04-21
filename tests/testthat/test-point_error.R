@@ -81,6 +81,10 @@ test_that(
 
     expect_true(m[1] < m[5])
 
+    # scaling
+
+    expect_equal(100 * p, p * 100)
+
     # Front-end ----
 
 

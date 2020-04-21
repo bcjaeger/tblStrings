@@ -307,6 +307,25 @@ vec_arith.tblStrings_pointErr.default <- function(op, x, y, ...) {
   vctrs::stop_incompatible_op(op, x, y)
 }
 
+#' @method vec_arith.tblStrings_pointErr numeric
+#' @export
+vec_arith.tblStrings_pointErr.numeric <- function(op, x, y, ...) {
+
+  .x <- chr_to_dbl(vctrs::vec_data(x))
+
+  list(
+    point = vctrs::vec_arith_base(op, .x[[1]], y),
+    error = vctrs::vec_arith_base(op, .x[[2]], y)
+  ) %>%
+    as_pointErr() %>%
+    vctrs::vec_restore(to = x)
+
+}
+
+#' @export
+vec_arith.numeric.tblStrings_pointErr <- function(op, x, y, ...) {
+  vec_arith(op = op, x=y, y=x)
+}
 
 # Front-end ------------------------------------------------------------------
 
