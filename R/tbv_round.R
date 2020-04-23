@@ -88,18 +88,23 @@ tbv_round <- function (x, max_decimals = 2, big_mark = ',') {
   i_1 <- which(i == 1)
   i_0 <- which(i == 0)
 
+
   if (!is_empty(i_2)){
     out[i_2] <- format(.round(x[i_2], max_decimals), justify = 'c',
       nsmall = safe_nsmall(max_decimals), big.mark = big_mark)
   }
 
-  if (!is_empty(i_1))
-    out[i_1] <- format(.round(x[i_1], max_decimals - 1), justify = 'c',
+  if (!is_empty(i_1)){
+    md <- max(max_decimals - 1, 0)
+    out[i_1] <- format(.round(x[i_1], md), justify = 'c',
       nsmall = safe_nsmall(max_decimals - 1), big.mark = big_mark)
+  }
 
-  if (!is_empty(i_0))
-    out[i_0] <- format(.round(x[i_0], max_decimals - 2), justify = 'c',
+  if (!is_empty(i_0)){
+    md <- max(max_decimals - 2, 0)
+    out[i_0] <- format(.round(x[i_0], md), justify = 'c',
       nsmall = safe_nsmall(max_decimals - 2), big.mark = big_mark)
+  }
 
   trimws(out)
 
