@@ -24,8 +24,9 @@ style        <- function(x) attr(x, 'style')
 
 validate_proportion <- function(x, label = 'x'){
 
-  x_lt_0 <- x < 0
-  x_gt_1 <- x > 1
+  x_obs <- !is.na(x)
+  x_lt_0 <- x < 0 & x_obs
+  x_gt_1 <- x > 1 & x_obs
 
   if(any(x_lt_0)){
 
@@ -55,6 +56,7 @@ validate_proportion <- function(x, label = 'x'){
 
 
 all_equal <- function(x) diff(range(x)) < .Machine$double.eps^0.5
+
 quietly_numeric <- function(x) suppressWarnings(as.numeric(x))
 
 mat_to_list <- function(x){
