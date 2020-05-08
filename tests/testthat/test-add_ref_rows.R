@@ -62,19 +62,13 @@ test_that("multiplication works", {
       class = c("tbl_df", "tbl", "data.frame")
     )
 
-  add_ref_rows(tidy_m2, data = df)
+  tidy_m1_refd <- add_ref_rows(tidy_m1, data = df)
+  tidy_m2_refd <- add_ref_rows(tidy_m2, data = df)
 
-  add_ref_rows(tidy_m1, data = df)
+  expect_true(all(levels(df$vs) %in% tidy_m1_refd$level))
+  expect_true(all(levels(df$gear) %in% tidy_m1_refd$level))
 
-  mtcars2 <- mtcars %>%
-    mutate(vs = factor(vs, labels = c("Z","A")), carb = factor(carb))
+  expect_equal(names(tidy_m1_refd), names(tidy_m2_refd))
 
-
-  tidy_model <- tidy(lm(mpg ~ disp + vs + carb, data = mtcars2))
-  tidy_model <- tidy(glm(vs ~ disp + carb, data = mtcars2, family = 'binomial'))
-
-  delim = ''
-
-  data <- mtcars2
 
 })

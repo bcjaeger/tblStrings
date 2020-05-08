@@ -10,7 +10,10 @@ if(getRversion() >= "2.15.1")
       ".x",
       "level",
       "value",
-      "col_keys"
+      "col_keys",
+      "term",
+      "variable",
+      "num_in_model"
     )
   )
 

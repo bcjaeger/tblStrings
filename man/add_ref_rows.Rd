@@ -2,14 +2,19 @@
 % Please edit documentation in R/add_ref_rows.R
 \name{add_ref_rows}
 \alias{add_ref_rows}
-\title{Title}
+\title{Rows for the reference group}
 \usage{
-add_ref_rows(tidy_model, data, delim = "")
+add_ref_rows(tidy_model, data, ref_value = 0, delim = "")
 }
 \arguments{
 \item{tidy_model}{A model that has been tidied using \link[broom:tidy]{broom::tidy}}
 
 \item{data}{the dataframe used to fit \code{tidy_model}}
+
+\item{ref_value}{a numeric value indicating what a referent value is.
+For example, if odds ratios are the estimate of interest, the
+referent value is 1. If log-odds are the estimate of interest,
+the referent value is 0.}
 
 \item{delim}{a character value indicating how factor levels are
 appended to factor variable names.}
@@ -19,10 +24,13 @@ a \link[tibble:tibble-package]{tibble} with additional rows
 representing the reference category.
 }
 \description{
-Title
+Rows for the reference group
 }
 \examples{
 
-
+\dontrun{
+mdl <- lm(Sepal.Length ~ Species, data = iris)
+add_ref_rows(broom::tidy(mdl), data = iris)
+}
 
 }

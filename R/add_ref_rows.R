@@ -1,9 +1,13 @@
 
 
-#' Title
+#' Rows for the reference group
 #'
 #' @param tidy_model A model that has been tidied using [broom::tidy]
 #' @param data the dataframe used to fit `tidy_model`
+#' @param ref_value a numeric value indicating what a referent value is.
+#'   For example, if odds ratios are the estimate of interest, the
+#'   referent value is 1. If log-odds are the estimate of interest,
+#'   the referent value is 0.
 #' @param delim a character value indicating how factor levels are
 #'   appended to factor variable names.
 #'
@@ -13,6 +17,11 @@
 #' @export
 #'
 #' @examples
+#'
+#' \dontrun{
+#' mdl <- lm(Sepal.Length ~ Species, data = iris)
+#' add_ref_rows(broom::tidy(mdl), data = iris)
+#' }
 #'
 add_ref_rows <- function(tidy_model, data, ref_value = 0, delim = ''){
 
