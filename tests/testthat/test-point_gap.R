@@ -1,20 +1,4 @@
 
-
-# test_that(
-#   "data frame behavior is correct",
-#   {
-#
-#     df <- data.frame(
-#       x = 1:10/10,
-#       y = 0:9 /10,
-#       z = 2:11/10
-#     )
-#
-#     df$pg = with(df, pointGap(x, y, z))
-#
-#   }
-# )
-
 test_that(
   "vector behavior is correct",
   {

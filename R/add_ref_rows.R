@@ -2,7 +2,8 @@
 
 #' Rows for the reference group
 #'
-#' @param tidy_model A model that has been tidied using [broom::tidy]
+#' @param tidy_model A model that has been tidied using the `tidy` function
+#'   from the `broom` package.
 #' @param data the dataframe used to fit `tidy_model`
 #' @param ref_value a numeric value indicating what a referent value is.
 #'   For example, if odds ratios are the estimate of interest, the

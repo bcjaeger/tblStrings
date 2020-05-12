@@ -672,29 +672,29 @@ is_pointGap <- function(x) {
 #'
 #' @param x a point gap object (see [pointGap])
 #'
+#' @param index a logical or numeric vector indicating which values
+#'   should be set as reference.
+#'
 #' @return a `pointGap` object with reference values replacing values
 #'   with all NA.
 #'
 #' @export
 #'
-pg_misRef <- function(x){
+#' @examples
+#'
+#' p <- pointGap(c(NA, 2), c(NA, 1.8), c(NA, 2.2), ref_value = 1)
+#' pg_set_ref(p, index = 1)
+#'
+pg_set_ref <- function(x, index){
 
   if(!is_pointGap(x)) stop("x must be a vector of type <tblStrings_pointGap>.",
     "\nInstead, it has type <", typeof(x), '>', call. = FALSE)
 
-  all_miss_indx <- chr_to_dbl(vctrs::vec_data(x)) %>%
-    do.call(cbind, .) %>%
-    apply(1, function(row) all(is.na(row)))
-
-  x[all_miss_indx] <- rep(
-    pointGap(point = ref_value(x), lower = ref_value(x), upper = ref_value(x)),
-    sum(all_miss_indx)
-  )
-
+  rv <- ref_value(x)
+  x[index] <- pointGap(point = rv, lower = rv, upper = rv)
   x
 
 }
-
 
 
 # vctr template:

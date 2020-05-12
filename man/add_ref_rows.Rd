@@ -7,7 +7,8 @@
 add_ref_rows(tidy_model, data, ref_value = 0, delim = "")
 }
 \arguments{
-\item{tidy_model}{A model that has been tidied using \link[broom:tidy]{broom::tidy}}
+\item{tidy_model}{A model that has been tidied using the \code{tidy} function
+from the \code{broom} package.}
 
 \item{data}{the dataframe used to fit \code{tidy_model}}
 

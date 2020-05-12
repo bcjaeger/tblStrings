@@ -7,8 +7,6 @@ test_that("multiplication works", {
   df$vs <- factor(df$vs, levels = c(0,1), labels = c("B","A"))
   df$gear <- factor(df$gear)
 
-  m1 <- stats::lm(mpg ~ vs + disp + gear, data = df)
-
   tidy_m1 <- structure(
     list(
       term = c("(Intercept)", "vsA", "disp", "gear4","gear5"),
