@@ -51,10 +51,7 @@ tbv_round <- function (x, max_decimals = 2, big_mark = ',') {
 
   if (is_empty(x)) return("NA")
 
-  if (is.integer(x)) warning(
-    "x is an integer - are you sure you want to round x?",
-    call. = FALSE
-  )
+  if (is.integer(x)) return(format(x, big.mark = big_mark))
 
   if (!is.numeric(x))
     stop("x should be numeric", call. = FALSE)

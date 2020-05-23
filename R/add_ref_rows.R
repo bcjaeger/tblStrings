@@ -30,11 +30,18 @@ add_ref_rows <- function(tidy_model, data, ref_value = 0, delim = ''){
     which() %>%
     names()
 
-  if(is_empty(data_factors))
+  if(is_empty(data_factors)){
+
+    warning('No factors identified in data. Are they character vectors?',
+      call.)
+
     return(tidy_model %>%
         dplyr::mutate(variable = term, level = NA_character_) %>%
         dplyr::select(variable, level, dplyr::everything())
     )
+
+  }
+
 
   data_factor_levels <- data_factors %>%
     lapply(function(x) levels(data[[x]])) %>%
