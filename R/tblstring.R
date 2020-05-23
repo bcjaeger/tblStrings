@@ -5,6 +5,7 @@
 #'
 #' @param ... Strings to format. Multiple inputs are concatenated
 #'   together before formatting. Named arguments are not supported.
+#' @param .sep Separator used to separate elements
 #' @param .envir Environment to evaluate each expression in.
 #'
 #' @return Character valued vector
@@ -22,6 +23,8 @@
 #' df = data.frame(x = 1:10, y=1:10)
 #'
 #' tbl_string("{x} / {y} = {as.integer(x/y)}", .envir = df)
+#'
+#' with(df, tbl_string("{x} / {y} = {as.integer(x/y)}"))
 #'
 tbl_string <- function(..., .sep = '', .envir = parent.frame()){
 

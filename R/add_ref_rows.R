@@ -33,7 +33,7 @@ add_ref_rows <- function(tidy_model, data, ref_value = 0, delim = ''){
   if(is_empty(data_factors)){
 
     warning('No factors identified in data. Are they character vectors?',
-      call.)
+      call. = FALSE)
 
     return(tidy_model %>%
         dplyr::mutate(variable = term, level = NA_character_) %>%
