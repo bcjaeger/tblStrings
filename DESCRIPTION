@@ -23,6 +23,9 @@ Imports:
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.0
 Suggests: 
-    testthat (>= 2.1.0)
+    testthat (>= 2.1.0),
+    knitr,
+    rmarkdown
 URL: https://github.com/bcjaeger/tblStrings
 BugReports: https://github.com/bcjaeger/tblStrings/issues
+VignetteBuilder: knitr

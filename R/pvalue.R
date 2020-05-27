@@ -115,19 +115,11 @@ is_signif <- function(x){
 format.tblStrings_pval <- function(x, ...) {
 
   vec_dat <- vctrs::vec_data(x)
-
   pthresh_lo <- print_thresh(x)
   pthresh_hi <- 1 - pthresh_lo
+  browser()
 
-  out <- tbv_round(
-    x = vec_dat,
-    max_decimals = max_decimals(x)
-  )
-
-  out[vec_dat < pthresh_lo] <- paste0("<", pthresh_lo)
-  out[vec_dat > pthresh_hi] <- paste0(">", pthresh_hi)
-  out[is.na(x)] <- NA_character_
-  out
+  tbl_p(vec_dat, thresh_lo = pthresh_lo, thresh_hi = pthresh_hi)
 
 }
 

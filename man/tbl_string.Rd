@@ -4,13 +4,25 @@
 \alias{tbl_string}
 \title{Table strings}
 \usage{
-tbl_string(..., .sep = "", .envir = parent.frame())
+tbl_string(
+  ...,
+  .sep = "",
+  format_fun = tblStrings::tbl_val,
+  format_args = list(),
+  .envir = parent.frame()
+)
 }
 \arguments{
 \item{...}{Strings to format. Multiple inputs are concatenated
 together before formatting. Named arguments are not supported.}
 
 \item{.sep}{Separator used to separate elements}
+
+\item{format_fun}{a function that will be applied to all numeric
+(integer or double) values (see example). Default is \link{tbl_val}.}
+
+\item{format_args}{a names list. Names and values of the list are
+the names and values of input arguments for \code{format_fun}, respectively.}
 
 \item{.envir}{Environment to evaluate each expression in.}
 }
@@ -27,12 +39,17 @@ y <- runif(10)
 
 tbl_string("{x} / {y} = {x/y}")
 
+custom <- function(a) format(a, digits=1, nsmall=1)
+tbl_string("{x} / {y} = {x/y}", format_fun = custom)
+
 tbl_string("{x}", "({100 * y}\%)", .sep = ' ')
 
 df = data.frame(x = 1:10, y=1:10)
 
 tbl_string("{x} / {y} = {as.integer(x/y)}", .envir = df)
+tbl_string("{x} / {y} = {as.integer(x/y)}", .envir = NULL)
 
 with(df, tbl_string("{x} / {y} = {as.integer(x/y)}"))
+
 
 }

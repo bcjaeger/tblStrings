@@ -22,7 +22,7 @@ safe_nsmall <- function(x){
 
 is_empty <- function (x) length(x) == 0
 
-#' Table rounding
+#' Table value rounding
 #'
 #' @param x a vector of numeric values
 #'
@@ -44,10 +44,10 @@ is_empty <- function (x) length(x) == 0
 #'
 #' @examples
 #'
-#' tbv_round( c(0.1234, 1.234, 12.34, 123.4, 1234) )
+#' tbl_val( c(0.1234, 1.234, 12.34, 123.4, 1234) )
 #'
 
-tbv_round <- function (x, max_decimals = 2, big_mark = ',') {
+tbl_val <- function (x, max_decimals = 2, big_mark = ',') {
 
   if (is_empty(x)) return("NA")
 
@@ -106,3 +106,6 @@ tbv_round <- function (x, max_decimals = 2, big_mark = ',') {
   trimws(out)
 
 }
+
+
+

@@ -121,7 +121,7 @@ pointErr <- function(
 format.tblStrings_pointErr <- function(x, ...) {
 
   .dat <- chr_to_dbl(vctrs::vec_data(x)) %>%
-    lapply(tbv_round, max_decimals = max_decimals(x), big_mark = big_mark(x))
+    lapply(tbl_val, max_decimals = max_decimals(x), big_mark = big_mark(x))
 
   switch(
     style(x),

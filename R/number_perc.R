@@ -144,10 +144,10 @@ format.tblStrings_numPer <- function(x, ...) {
   .dat[[2]] <- 100 * (.dat[[1]] / .dat[[2]])
 
   .dat[[1]] %<>%
-    tbv_round(max_decimals = 0, big_mark = big_mark(x))
+    tbl_val(max_decimals = 0, big_mark = big_mark(x))
 
   .dat[[2]] %<>%
-    tbv_round(max_decimals = max_decimals(x), big_mark = big_mark(x))
+    tbl_val(max_decimals = max_decimals(x), big_mark = big_mark(x))
 
   paste0(
     .dat[[1]], ' ',  brac_left(x),

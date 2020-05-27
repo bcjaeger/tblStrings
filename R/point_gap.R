@@ -260,7 +260,7 @@ format.tblStrings_pointGap <- function(x, ...) {
     apply(1, all)
 
   .dat <- .dat %>%
-    lapply(tbv_round,
+    lapply(tbl_val,
       max_decimals = max_decimals(x),
       big_mark = big_mark(x)
     )

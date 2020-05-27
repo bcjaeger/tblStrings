@@ -13,7 +13,9 @@ if(getRversion() >= "2.15.1")
       "col_keys",
       "term",
       "variable",
-      "num_in_model"
+      "num_in_model",
+      "..format_args",
+      "..first_arg_name"
     )
   )
 
