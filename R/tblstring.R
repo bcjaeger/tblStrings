@@ -35,16 +35,12 @@
 #' with(df, tbl_string("{x} / {y} = {as.integer(x/y)}"))
 #'
 #'
-tbl_string <- function(..., .sep = '',
-  format_fun = tblStrings::tbl_val,
-  format_args = list(),
-  .envir = parent.frame()
+tbl_string <- function(..., .sep = '', .envir = parent.frame(),
+  max_decimals = 2, big_mark = ","
 ){
 
   string <- Reduce(base::c, eval(substitute(alist(...)))) %>%
     paste(collapse = .sep)
-
-  first_arg_name <- names(as.list(args(format_fun)))[1]
 
   # objects inside of {}
   objects <- string %>%
@@ -54,18 +50,14 @@ tbl_string <- function(..., .sep = '',
 
   if(is.data.frame(.envir)) .envir <- list2env(.envir)
 
-  .envir$..format_args <- format_args
-  .envir$..first_arg_name <- first_arg_name
   .envir$..f <- function(x){
-
     if (is.numeric(x)){
-      args <- ..format_args
-      args[[..first_arg_name]] <- x
-      trimws(do.call(format_fun, args = args))
+      trimws(tblStrings::tbl_val(x,
+        max_decimals = max_decimals, big_mark = big_mark)
+      )
     } else {
       x
     }
-
   }
 
   # _p_attern
