@@ -4,19 +4,36 @@
 \alias{tbl_val}
 \title{Table value rounding}
 \usage{
-tbl_val(x, max_decimals = 2, big_mark = ",")
+tbl_val(
+  x,
+  decimals_0_to_1 = 2,
+  decimals_1_to_10 = 1,
+  decimals_10_to_100 = 0,
+  decimals_100_plus = 0,
+  big_mark = ",",
+  .missing = "--"
+)
 }
 \arguments{
 \item{x}{a vector of numeric values}
 
-\item{max_decimals}{an integer value that will determine the maximum
-number of decimals in the output. Larger numbers will not use the
-maximum number of decimals in order to maintain the same, or at
-least similar length as smaller numbers.}
+\item{decimals_0_to_1}{number of decimals to display for
+numbers < 1}
+
+\item{decimals_1_to_10}{number of decimals to display for
+numbers >= 1 and < 10}
+
+\item{decimals_10_to_100}{number of decimals to display for
+numbers >= 10 and < 100}
+
+\item{decimals_100_plus}{number of decimals to display for
+numbers >= 100}
 
 \item{big_mark}{a character value used to separate number groups to the
 left of the decimal point. See \link{prettyNum} for more details on this.
 Set this input to '' to negate it's effect.}
+
+\item{.missing}{a character string that replaces missing values.}
 }
 \value{
 a character vector with rounded values
@@ -25,12 +42,14 @@ a character vector with rounded values
 Table value rounding
 }
 \note{
-\code{NA} values are automatically converted to character \code{'NA'} values.
+\code{tbl_val} converts \code{NA} values to non-missing character values.
 This is because different R packages that tabulate numbers handle
 true \code{NA} values differently, but handle character values the same way.
 }
 \examples{
 
 tbl_val( c(0.1234, 1.234, 12.34, 123.4, 1234) )
+
+tbl_val( c(0.1234, 1.234, 12.34, 123.4, 1234), 2, 1, 1, 0 )
 
 }

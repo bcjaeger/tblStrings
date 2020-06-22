@@ -7,9 +7,13 @@
 tbl_string(
   ...,
   .sep = "",
-  format_fun = tblStrings::tbl_val,
-  format_args = list(),
-  .envir = parent.frame()
+  .envir = parent.frame(),
+  decimals_0_to_1 = 2,
+  decimals_1_to_10 = 1,
+  decimals_10_to_100 = 0,
+  decimals_100_plus = 0,
+  big_mark = ",",
+  .missing = "--"
 )
 }
 \arguments{
@@ -18,16 +22,28 @@ together before formatting. Named arguments are not supported.}
 
 \item{.sep}{Separator used to separate elements}
 
-\item{format_fun}{a function that will be applied to all numeric
-(integer or double) values (see example). Default is \link{tbl_val}.}
+\item{.envir}{environment to evaluate each expression in.}
 
-\item{format_args}{a names list. Names and values of the list are
-the names and values of input arguments for \code{format_fun}, respectively.}
+\item{decimals_0_to_1}{number of decimals to display for
+numbers < 1}
 
-\item{.envir}{Environment to evaluate each expression in.}
+\item{decimals_1_to_10}{number of decimals to display for
+numbers >= 1 and < 10}
+
+\item{decimals_10_to_100}{number of decimals to display for
+numbers >= 10 and < 100}
+
+\item{decimals_100_plus}{number of decimals to display for
+numbers >= 100}
+
+\item{big_mark}{a character value used to separate number groups to the
+left of the decimal point. See \link{prettyNum} for more details on this.
+Set this input to '' to negate it's effect.}
+
+\item{.missing}{a character string that replaces missing values.}
 }
 \value{
-Character valued vector
+a character vector
 }
 \description{
 Table strings
@@ -39,9 +55,6 @@ y <- runif(10)
 
 tbl_string("{x} / {y} = {x/y}")
 
-custom <- function(a) format(a, digits=1, nsmall=1)
-tbl_string("{x} / {y} = {x/y}", format_fun = custom)
-
 tbl_string("{x}", "({100 * y}\%)", .sep = ' ')
 
 df = data.frame(x = 1:10, y=1:10)
@@ -50,6 +63,5 @@ tbl_string("{x} / {y} = {as.integer(x/y)}", .envir = df)
 tbl_string("{x} / {y} = {as.integer(x/y)}", .envir = NULL)
 
 with(df, tbl_string("{x} / {y} = {as.integer(x/y)}"))
-
 
 }

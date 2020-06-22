@@ -26,19 +26,29 @@ is_empty <- function (x) length(x) == 0
 #'
 #' @param x a vector of numeric values
 #'
-#' @param max_decimals an integer value that will determine the maximum
-#'   number of decimals in the output. Larger numbers will not use the
-#'   maximum number of decimals in order to maintain the same, or at
-#'   least similar length as smaller numbers.
+#' @param decimals_0_to_1 number of decimals to display for
+#'   numbers < 1
+#'
+#' @param decimals_1_to_10 number of decimals to display for
+#'   numbers >= 1 and < 10
+#'
+#' @param decimals_10_to_100 number of decimals to display for
+#'   numbers >= 10 and < 100
+#'
+#' @param decimals_100_plus number of decimals to display for
+#'   numbers >= 100
 #'
 #' @param big_mark a character value used to separate number groups to the
 #'   left of the decimal point. See [prettyNum] for more details on this.
 #'   Set this input to '' to negate it's effect.
 #'
+#' @param .missing a character string that replaces missing values.
+#'
 #' @return a character vector with rounded values
+#'
 #' @export
 #'
-#' @note `NA` values are automatically converted to character `'NA'` values.
+#' @note `tbl_val` converts `NA` values to non-missing character values.
 #'   This is because different R packages that tabulate numbers handle
 #'   true `NA` values differently, but handle character values the same way.
 #'
@@ -46,61 +56,67 @@ is_empty <- function (x) length(x) == 0
 #'
 #' tbl_val( c(0.1234, 1.234, 12.34, 123.4, 1234) )
 #'
+#' tbl_val( c(0.1234, 1.234, 12.34, 123.4, 1234), 2, 1, 1, 0 )
+#'
 
-tbl_val <- function (x, max_decimals = 2, big_mark = ',') {
+tbl_val <- function (
+  x,
+  decimals_0_to_1    = 2,
+  decimals_1_to_10   = 1,
+  decimals_10_to_100 = 0,
+  decimals_100_plus  = 0,
+  big_mark = ',',
+  .missing = '--'
+) {
 
-  if (is_empty(x)) return("NA")
+  if (is_empty(x)) return(.missing)
+
+  decimals <- c(
+    decimals_0_to_1,
+    decimals_1_to_10,
+    decimals_10_to_100,
+    decimals_100_plus
+  )
 
   if (is.integer(x)) return(format(x, big.mark = big_mark))
 
   if (!is.numeric(x))
     stop("x should be numeric", call. = FALSE)
 
-  out <- rep("NA", vctrs::vec_size(x))
+  out <- rep(.missing, vctrs::vec_size(x))
 
   if (all(is.na(x))) return(out)
-
-  # if rounded x is in 0 - 1 ----> 2 decimals
-  # if rounded x is in 1 - 10 ---> 1 decimals
-  # if rounded x is in 10 - 100 -> 0 decimals
 
   # take absolute value to round based only on magnitudes
   x_abs <- abs(x)
 
   # the breaks are based on rounded x instead of x itself
-  x_brks <- c(0, 9.995, 99.95, Inf)
+  x_brks <- c(0, 0.995, 9.995, 99.95, Inf)
 
   # x_cuts create boundary categories for rounding
   x_cuts <- cut(
     x_abs,
     breaks = x_brks,
     include.lowest = TRUE,
-    right = FALSE,
-    labels = c(2, 1, 0)
+    right = FALSE
   )
 
-  i <- as.numeric(as.character(x_cuts))
+  out_breaks <- list(
+    lt1 = which(x_cuts == '[0,0.995)'),
+    lt10 = which(x_cuts == '[0.995,9.99)'),
+    lt100 = which(x_cuts == '[9.99,100)'),
+    gt100 = which(x_cuts == '[100,Inf]')
+  )
 
-  i_2 <- which(i == 2)
-  i_1 <- which(i == 1)
-  i_0 <- which(i == 0)
+  for (i in seq_along(out_breaks)) {
 
+    ob <- out_breaks[[i]]
 
-  if (!is_empty(i_2)){
-    out[i_2] <- format(.round(x[i_2], max_decimals), justify = 'c',
-      nsmall = safe_nsmall(max_decimals), big.mark = big_mark)
-  }
+    if(!is_empty(ob)){
+      out[ob] <- format(.round(x[ob], decimals[i]), justify = 'c',
+        nsmall = safe_nsmall(decimals[i]), big.mark = big_mark)
+    }
 
-  if (!is_empty(i_1)){
-    md <- max(max_decimals - 1, 0)
-    out[i_1] <- format(.round(x[i_1], md), justify = 'c',
-      nsmall = safe_nsmall(max_decimals - 1), big.mark = big_mark)
-  }
-
-  if (!is_empty(i_0)){
-    md <- max(max_decimals - 2, 0)
-    out[i_0] <- format(.round(x[i_0], md), justify = 'c',
-      nsmall = safe_nsmall(max_decimals - 2), big.mark = big_mark)
   }
 
   trimws(out)
@@ -109,3 +125,4 @@ tbl_val <- function (x, max_decimals = 2, big_mark = ',') {
 
 
 
+# In presenting p-values, please limit to 2 decimal places for .99 ≥ p ≥ .01; limit to 3 decimal places for .01 > p ≥ .001; and for smaller values express as "p<.001"

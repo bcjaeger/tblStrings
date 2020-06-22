@@ -5,14 +5,14 @@
 #'
 #' @param ... Strings to format. Multiple inputs are concatenated
 #'   together before formatting. Named arguments are not supported.
-#' @param .sep Separator used to separate elements
-#' @param format_fun a function that will be applied to all numeric
-#'   (integer or double) values (see example). Default is [tbl_val].
-#' @param format_args a names list. Names and values of the list are
-#'   the names and values of input arguments for `format_fun`, respectively.
-#' @param .envir Environment to evaluate each expression in.
 #'
-#' @return Character valued vector
+#' @param .sep Separator used to separate elements
+#'
+#' @param .envir environment to evaluate each expression in.
+#'
+#' @inheritParams tbl_val
+#'
+#' @return a character vector
 #' @export
 #'
 #' @examples
@@ -21,9 +21,6 @@
 #' y <- runif(10)
 #'
 #' tbl_string("{x} / {y} = {x/y}")
-#'
-#' custom <- function(a) format(a, digits=1, nsmall=1)
-#' tbl_string("{x} / {y} = {x/y}", format_fun = custom)
 #'
 #' tbl_string("{x}", "({100 * y}%)", .sep = ' ')
 #'
@@ -34,10 +31,19 @@
 #'
 #' with(df, tbl_string("{x} / {y} = {as.integer(x/y)}"))
 #'
-#'
-tbl_string <- function(..., .sep = '', .envir = parent.frame(),
-  max_decimals = 2, big_mark = ","
+
+tbl_string <- function(...,
+  .sep = '',
+  .envir = parent.frame(),
+  decimals_0_to_1    = 2,
+  decimals_1_to_10   = 1,
+  decimals_10_to_100 = 0,
+  decimals_100_plus  = 0,
+  big_mark = ",",
+  .missing = '--'
 ){
+
+  decimals <- c(2, 2, 1, 0)
 
   string <- Reduce(base::c, eval(substitute(alist(...)))) %>%
     paste(collapse = .sep)
@@ -52,8 +58,15 @@ tbl_string <- function(..., .sep = '', .envir = parent.frame(),
 
   .envir$..f <- function(x){
     if (is.numeric(x)){
-      trimws(tblStrings::tbl_val(x,
-        max_decimals = max_decimals, big_mark = big_mark)
+      trimws(
+        tblStrings::tbl_val(x,
+          decimals_0_to_1    = decimals_0_to_1,
+          decimals_1_to_10   = decimals_1_to_10,
+          decimals_10_to_100 = decimals_10_to_100,
+          decimals_100_plus  = decimals_100_plus,
+          big_mark = big_mark,
+          .missing = .missing
+        )
       )
     } else {
       x
