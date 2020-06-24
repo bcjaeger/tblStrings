@@ -6,34 +6,55 @@
 \usage{
 tbl_val(
   x,
-  decimals_0_to_1 = 2,
-  decimals_1_to_10 = 1,
-  decimals_10_to_100 = 0,
-  decimals_100_plus = 0,
+  breaks = c(1, 10, Inf),
+  decimals = c(2, 1, 0),
+  miss_replace = "--",
   big_mark = ",",
-  .missing = "--"
+  big_interval = 3L,
+  small_mark = "",
+  small_interval = 5L,
+  decimal_mark = getOption("OutDec"),
+  zero_print = NULL,
+  trim = TRUE
 )
 }
 \arguments{
 \item{x}{a vector of numeric values}
 
-\item{decimals_0_to_1}{number of decimals to display for
-numbers < 1}
+\item{breaks}{a positive, monotonically increasing numeric vector
+designating rounding boundaries. With \code{breaks = c(1, 10, 100, 1000)}
+and \code{decimals = c(2, 1, 0)}}
 
-\item{decimals_1_to_10}{number of decimals to display for
-numbers >= 1 and < 10}
+\item{decimals}{a numeric vector of equal length to \code{breaks} that
+indicates how many decimals to round to in the numeric range
+designated by \code{breaks}. (see notes for example). Allowed values
+are 0 <= \code{decimals} <= 20.}
 
-\item{decimals_10_to_100}{number of decimals to display for
-numbers >= 10 and < 100}
-
-\item{decimals_100_plus}{number of decimals to display for
-numbers >= 100}
+\item{miss_replace}{a character string that replaces missing values.}
 
 \item{big_mark}{a character value used to separate number groups to the
 left of the decimal point. See \link{prettyNum} for more details on this.
 Set this input to '' to negate it's effect.}
 
-\item{.missing}{a character string that replaces missing values.}
+\item{big_interval}{a numeric value indicating the size of number groups
+for numbers before (hence big) the decimal.}
+
+\item{small_mark}{a character value used to separate number groups to
+the right of the decimal point.}
+
+\item{small_interval}{a numeric value indicating the size of number groups
+for numbers after (hence small) the decimal.}
+
+\item{decimal_mark}{the character to be used to indicate the numeric
+decimal point.}
+
+\item{zero_print}{logical, character string or NULL specifying if and
+how zeros should be formatted specially. Useful for pretty printing
+'sparse' objects.}
+
+\item{trim}{logical; if \code{FALSE}, logical, numeric and complex values
+are right-justified to a common width: if \code{TRUE} the leading blanks
+for justification are suppressed.}
 }
 \value{
 a character vector with rounded values
@@ -50,6 +71,6 @@ true \code{NA} values differently, but handle character values the same way.
 
 tbl_val( c(0.1234, 1.234, 12.34, 123.4, 1234) )
 
-tbl_val( c(0.1234, 1.234, 12.34, 123.4, 1234), 2, 1, 1, 0 )
+tbl_val( c(0.995, 9.995, 99.95, 2003.5), c(1,10,100,Inf), c(2,2,1,0) )
 
 }

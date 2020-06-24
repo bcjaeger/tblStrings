@@ -20,29 +20,61 @@ safe_nsmall <- function(x){
   x
 }
 
+find_smallest_10 <- function(x, y = 1e-10){
+
+  if(x < 1e-10) stop(
+    'the number you are attempting to round is too small',
+    call. = FALSE
+  )
+
+  if(x == Inf) return(Inf)
+
+  if (x < y) { return(y/10) } else { find_smallest_10(x, y*10) }
+
+}
+
+duplicate_last <- function(x) c(x, x[length(x)])
+
 is_empty <- function (x) length(x) == 0
 
 #' Table value rounding
 #'
 #' @param x a vector of numeric values
 #'
-#' @param decimals_0_to_1 number of decimals to display for
-#'   numbers < 1
+#' @param breaks a positive, monotonically increasing numeric vector
+#'   designating rounding boundaries. With `breaks = c(1, 10, 100, 1000)`
+#'   and `decimals = c(2, 1, 0)`
 #'
-#' @param decimals_1_to_10 number of decimals to display for
-#'   numbers >= 1 and < 10
-#'
-#' @param decimals_10_to_100 number of decimals to display for
-#'   numbers >= 10 and < 100
-#'
-#' @param decimals_100_plus number of decimals to display for
-#'   numbers >= 100
+#' @param decimals a numeric vector of equal length to `breaks` that
+#'   indicates how many decimals to round to in the numeric range
+#'   designated by `breaks`. (see notes for example). Allowed values
+#'   are 0 <= `decimals` <= 20.
 #'
 #' @param big_mark a character value used to separate number groups to the
 #'   left of the decimal point. See [prettyNum] for more details on this.
 #'   Set this input to '' to negate it's effect.
 #'
-#' @param .missing a character string that replaces missing values.
+#' @param miss_replace a character string that replaces missing values.
+#'
+#' @param big_interval a numeric value indicating the size of number groups
+#'   for numbers before (hence big) the decimal.
+#'
+#' @param small_mark a character value used to separate number groups to
+#'   the right of the decimal point.
+#'
+#' @param small_interval a numeric value indicating the size of number groups
+#'   for numbers after (hence small) the decimal.
+#'
+#' @param decimal_mark the character to be used to indicate the numeric
+#'   decimal point.
+#'
+#' @param zero_print logical, character string or NULL specifying if and
+#'   how zeros should be formatted specially. Useful for pretty printing
+#'  'sparse' objects.
+#'
+#' @param trim logical; if `FALSE`, logical, numeric and complex values
+#'   are right-justified to a common width: if `TRUE` the leading blanks
+#'   for justification are suppressed.
 #'
 #' @return a character vector with rounded values
 #'
@@ -56,34 +88,39 @@ is_empty <- function (x) length(x) == 0
 #'
 #' tbl_val( c(0.1234, 1.234, 12.34, 123.4, 1234) )
 #'
-#' tbl_val( c(0.1234, 1.234, 12.34, 123.4, 1234), 2, 1, 1, 0 )
+#' tbl_val( c(0.995, 9.995, 99.95, 2003.5), c(1,10,100,Inf), c(2,2,1,0) )
 #'
 
 tbl_val <- function (
   x,
-  decimals_0_to_1    = 2,
-  decimals_1_to_10   = 1,
-  decimals_10_to_100 = 0,
-  decimals_100_plus  = 0,
+  breaks = c(1, 10, Inf),
+  decimals = c(2, 1, 0),
+  miss_replace = '--',
   big_mark = ',',
-  .missing = '--'
+  big_interval = 3L,
+  small_mark = '',
+  small_interval = 5L,
+  decimal_mark = getOption('OutDec'),
+  zero_print = NULL,
+  trim = TRUE
 ) {
 
-  if (is_empty(x)) return(.missing)
+  if (length(breaks) != length(decimals))
+    stop('breaks and decimals should have equal length', call. = FALSE)
 
-  decimals <- c(
-    decimals_0_to_1,
-    decimals_1_to_10,
-    decimals_10_to_100,
-    decimals_100_plus
-  )
-
-  if (is.integer(x)) return(format(x, big.mark = big_mark))
+  if (is_empty(x)) stop("cannot format empty vectors", call. = FALSE)
 
   if (!is.numeric(x))
     stop("x should be numeric", call. = FALSE)
 
-  out <- rep(.missing, vctrs::vec_size(x))
+  if (is.integer(x)) return(format(x, big.mark = big_mark))
+
+  if(!(all(breaks>0))) stop("all breaks should be > 0", call. = FALSE)
+
+  if(any(diff(breaks) < 0))
+    stop("breaks should be strictly monotonically increasing", call. = FALSE)
+
+  out <- rep(miss_replace, vctrs::vec_size(x))
 
   if (all(is.na(x))) return(out)
 
@@ -91,7 +128,21 @@ tbl_val <- function (
   x_abs <- abs(x)
 
   # the breaks are based on rounded x instead of x itself
-  x_brks <- c(0, 0.995, 9.995, 99.95, Inf)
+  breaks_smallest_10 <- sapply(breaks, find_smallest_10)
+
+  # rounding to 0 decimals, 9.5 should be considered as if it were 10
+  # rounding to 1 decimals, 9.95 should be considered as if it were 10
+  # rounding to 2 decimals, 9.995 should be considered as if it were 10
+  # in general...
+
+  bump_down <- 0.5 / (10^decimals)
+
+  x_brks <- c(0, breaks - bump_down)
+
+  if(max(x_brks) < Inf){
+    x_brks <- c(x_brks, Inf)
+    decimals <- duplicate_last(decimals)
+  }
 
   # x_cuts create boundary categories for rounding
   x_cuts <- cut(
@@ -101,11 +152,9 @@ tbl_val <- function (
     right = FALSE
   )
 
-  out_breaks <- list(
-    lt1 = which(x_cuts == '[0,0.995)'),
-    lt10 = which(x_cuts == '[0.995,9.99)'),
-    lt100 = which(x_cuts == '[9.99,100)'),
-    gt100 = which(x_cuts == '[100,Inf]')
+  out_breaks <- lapply(
+    levels(x_cuts),
+    function(.x) which(x_cuts == .x)
   )
 
   for (i in seq_along(out_breaks)) {
@@ -113,16 +162,25 @@ tbl_val <- function (
     ob <- out_breaks[[i]]
 
     if(!is_empty(ob)){
-      out[ob] <- format(.round(x[ob], decimals[i]), justify = 'c',
-        nsmall = safe_nsmall(decimals[i]), big.mark = big_mark)
+      out[ob] <- .round(x[ob], digits = decimals[i]) %>%
+        format(
+          nsmall = safe_nsmall(decimals[i]),
+          big.mark = big_mark,
+          big.interval = big_interval,
+          small.mark = small_mark,
+          small.interval = small_interval,
+          decimal.mark = decimal_mark,
+          zero.print = zero_print,
+          #justify = justify,
+          trim = trim,
+        )
     }
 
   }
 
-  trimws(out)
+  out
 
 }
 
 
 
-# In presenting p-values, please limit to 2 decimal places for .99 ≥ p ≥ .01; limit to 3 decimal places for .01 > p ≥ .001; and for smaller values express as "p<.001"

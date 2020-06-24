@@ -32,18 +32,21 @@
 #' with(df, tbl_string("{x} / {y} = {as.integer(x/y)}"))
 #'
 
-tbl_string <- function(...,
+tbl_string <- function(
+  ...,
   .sep = '',
   .envir = parent.frame(),
-  decimals_0_to_1    = 2,
-  decimals_1_to_10   = 1,
-  decimals_10_to_100 = 0,
-  decimals_100_plus  = 0,
-  big_mark = ",",
-  .missing = '--'
+  breaks = c(1, 10, Inf),
+  decimals = c(2, 1, 0),
+  miss_replace = '--',
+  big_mark = ',',
+  big_interval = 3L,
+  small_mark = '',
+  small_interval = 5L,
+  decimal_mark = getOption('OutDec'),
+  zero_print = NULL,
+  trim = TRUE
 ){
-
-  decimals <- c(2, 2, 1, 0)
 
   string <- Reduce(base::c, eval(substitute(alist(...)))) %>%
     paste(collapse = .sep)
@@ -58,16 +61,18 @@ tbl_string <- function(...,
 
   .envir$..f <- function(x){
     if (is.numeric(x)){
-      trimws(
-        tblStrings::tbl_val(x,
-          decimals_0_to_1    = decimals_0_to_1,
-          decimals_1_to_10   = decimals_1_to_10,
-          decimals_10_to_100 = decimals_10_to_100,
-          decimals_100_plus  = decimals_100_plus,
-          big_mark = big_mark,
-          .missing = .missing
-        )
-      )
+      trimws(tbl_val(x,
+        breaks = breaks,
+        decimals = decimals,
+        miss_replace = miss_replace,
+        big_mark = big_mark,
+        big_interval = big_interval,
+        small_mark = small_mark,
+        small_interval = small_interval,
+        decimal_mark = decimal_mark,
+        zero_print = zero_print,
+        trim = trim
+      ))
     } else {
       x
     }
@@ -84,6 +89,7 @@ tbl_string <- function(...,
   # make output a character
   # (avoid potential issues with attributes of glue objects)
   as.character(glue::glue(string, .envir = .envir))
+
 
 }
 

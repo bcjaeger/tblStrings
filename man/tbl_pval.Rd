@@ -4,29 +4,49 @@
 \alias{tbl_pval}
 \title{P-value rounding}
 \usage{
-tbl_pval(x, decimals = 3, thresh_lo = 0.001, thresh_hi = 0.999)
+tbl_pval(
+  x,
+  decimals_outer = 3,
+  decimals_inner = 2,
+  boundary_lo = 0.01,
+  boundary_hi = 0.99,
+  thresh_lo = 0.001,
+  thresh_hi = 0.999,
+  miss_replace = "--"
+)
 }
 \arguments{
-\item{x}{a vector of numeric values}
+\item{x}{a vector of numeric values.}
 
-\item{decimals}{number of decimals to print}
+\item{decimals_outer}{number of decimals to print when
+p > thresh_hi or p < thresh_lo.}
+
+\item{decimals_inner}{number of decimals to print when
+\code{thresh_lo} < p < \code{thresh_hi}.}
+
+\item{boundary_lo}{the lower bound of the inner range.}
+
+\item{boundary_hi}{the upper bound of the inner range.}
 
 \item{thresh_lo}{the lowest value printed. Values lower than the
 threshold will be printed as <threshold.}
 
 \item{thresh_hi}{the highest value printed. Values higher than the
 threshold will be printed as >threshold.}
+
+\item{miss_replace}{a character string that replaces missing values.}
 }
 \value{
 a character vector
 }
 \description{
-P-value rounding
+In presenting p-values, journals are likely to request
+2 decimal places for .99 >= p >= .01; 3 decimal places for
+.01 > p >= .001; and for smaller values express as "p<.001"
 }
 \examples{
 
-pvals <- c(0.01, 0.001, 0.0001, 0.9, 0.99, 0.9999)
-
+pvals <- c(0.00999, 0.01, 0.0052, 0.0011, 0.0001, 0.9, 0.999, 0.9999)
 tbl_pval(pvals)
 
 }
