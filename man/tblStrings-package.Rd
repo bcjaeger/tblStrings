@@ -6,7 +6,9 @@
 \alias{tblStrings-package}
 \title{tblStrings: What the Package Does (One Line, Title Case)}
 \description{
-What the package does (one paragraph).
+tblStrings helps translate double and integer valued data into
+    character values formatted with rules that are generally consistent with
+    the requested formats from academic journals.
 }
 \seealso{
 Useful links:
@@ -17,7 +19,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: First Last \email{first.last@example.com} (\href{https://orcid.org/YOUR-ORCID-ID}{ORCID})
+\strong{Maintainer}: Byron Jaeger \email{bcjaeger@uab.edu} (\href{https://orcid.org/0000-0001-7399-2299}{ORCID})
 
 }
 \keyword{internal}

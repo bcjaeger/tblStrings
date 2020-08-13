@@ -36,6 +36,7 @@ tbl_string <- function(
   ...,
   .sep = '',
   .envir = parent.frame(),
+  round_half_to_even = FALSE,
   breaks = c(1, 10, Inf),
   decimals = c(2, 1, 0),
   miss_replace = '--',
@@ -48,22 +49,26 @@ tbl_string <- function(
   trim = TRUE
 ){
 
-  string <- Reduce(base::c, eval(substitute(alist(...)))) %>%
-    paste(collapse = .sep)
+  .dots <- substitute(alist(...))
+
+  string <- Reduce(base::c, eval(.dots))
+  string <- paste(string, collapse = .sep)
 
   # objects inside of {}
-  objects <- string %>%
-    stringr::str_extract_all(pattern = "(?<=\\{).+?(?=\\})") %>%
-    .[[1]] %>%
-    unique()
+  pattern <- "(?<=\\{).+?(?=\\})"
+  objects <- stringi::stri_extract_all_regex(string, pattern)
+  objects <- objects[[1]]
+  objects <- unique(objects)
 
   if(is.data.frame(.envir)) .envir <- list2env(.envir)
 
   .envir$..f <- function(x){
+
     if (is.numeric(x)){
       trimws(tbl_val(x,
         breaks = breaks,
         decimals = decimals,
+        round_half_to_even = round_half_to_even,
         miss_replace = miss_replace,
         big_mark = big_mark,
         big_interval = big_interval,
@@ -76,10 +81,12 @@ tbl_string <- function(
     } else {
       x
     }
+
   }
 
   # _p_attern
   p <- paste0("{", objects, "}")
+
   # _r_eplacement
   r <- paste0("{..f(", objects, ")}")
 

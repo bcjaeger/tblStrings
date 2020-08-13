@@ -1,27 +1,25 @@
 Package: tblStrings
 Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Version: 0.0.1.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
-           role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+    c(person(given = "Byron",
+             family = "Jaeger",
+             role = c("aut", "cre"),
+             email = "bcjaeger@uab.edu",
+             comment = c(ORCID = "0000-0001-7399-2299")))
+Description: tblStrings helps translate double and integer valued data into
+    character values formatted with rules that are generally consistent with
+    the requested formats from academic journals. 
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports: 
     methods,
-    magrittr,
-    vctrs,
-    tibble,
     glue,
-    rlang,
-    dplyr,
-    stringr
+    stringr,
+    stringi
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 Suggests: 
     testthat (>= 2.1.0),
     knitr,

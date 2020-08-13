@@ -1,45 +1,14 @@
 
-.round = function(x, digits = 0) {
-
-  # Why do we need this?
-  # default behavior of the round() function is not ideal for tables
-  # (inconsistency with 0.5 sometimes rounding to 0 instead of 1)
-
-  posneg = sign(x)
-  z = abs(x)*10^digits
-  z = z + 0.5
-  z = trunc(z)
-  z = z/10^digits
-  z*posneg
-
-}
-
-safe_nsmall <- function(x){
-  x <- max(x, 0)
-  x <- min(x, 20)
-  x
-}
-
-find_smallest_10 <- function(x, y = 1e-10){
-
-  if(x < 1e-10) stop(
-    'the number you are attempting to round is too small',
-    call. = FALSE
-  )
-
-  if(x == Inf) return(Inf)
-
-  if (x < y) { return(y/10) } else { find_smallest_10(x, y*10) }
-
-}
-
-duplicate_last <- function(x) c(x, x[length(x)])
-
-is_empty <- function (x) length(x) == 0
-
 #' Table value rounding
 #'
 #' @param x a vector of numeric values
+#'
+#' @param round_half_to_even a logical value. If `TRUE`, then when the
+#'   fractional part of `x` is half-way between two rounding boundaries,
+#'   it will be rounded to the even boundary nearest to x. For example,
+#'   +23.5 becomes +24, as does +24.5; while −23.5 becomes −24,
+#'   as does −24.5. If `FALSE`, halves are automatically rounded to
+#'   the boundary with highest absolute value.
 #'
 #' @param breaks a positive, monotonically increasing numeric vector
 #'   designating rounding boundaries. With `breaks = c(1, 10, 100, 1000)`
@@ -68,11 +37,11 @@ is_empty <- function (x) length(x) == 0
 #' @param decimal_mark the character to be used to indicate the numeric
 #'   decimal point.
 #'
-#' @param zero_print logical, character string or NULL specifying if and
-#'   how zeros should be formatted specially. Useful for pretty printing
-#'  'sparse' objects.
+#' @param zero_print a logical value, character string or NULL value
+#'   specifying if and how zeros should be formatted specially.
+#'   Useful for pretty printing 'sparse' objects.
 #'
-#' @param trim logical; if `FALSE`, logical, numeric and complex values
+#' @param trim a logical value; if `FALSE`, logical, numeric and complex values
 #'   are right-justified to a common width: if `TRUE` the leading blanks
 #'   for justification are suppressed.
 #'
@@ -82,17 +51,28 @@ is_empty <- function (x) length(x) == 0
 #'
 #' @note `tbl_val` converts `NA` values to non-missing character values.
 #'   This is because different R packages that tabulate numbers handle
-#'   true `NA` values differently, but handle character values the same way.
+#'   true `NA` values differently, but handle character values the same
+#'   way.
+#'
+#' @details Using `round_half_to_even = TRUE` minimizes the expected
+#'  error when summing over rounded figures, even when the inputs are
+#'  mostly positive or mostly negative. This variant of the
+#'  round-to-nearest method is also called convergent rounding,
+#'  statistician's rounding, Dutch rounding, Gaussian rounding,
+#'  odd–even rounding, or bankers' rounding.
 #'
 #' @examples
 #'
-#' tbl_val( c(0.1234, 1.234, 12.34, 123.4, 1234) )
+#' tbl_val(x = c(0.1234, 1.234, 12.34, 123.4, 1234))
 #'
-#' tbl_val( c(0.995, 9.995, 99.95, 2003.5), c(1,10,100,Inf), c(2,2,1,0) )
+#' tbl_val(x = c(0.995, 9.995, 99.95, 2003.5),
+#'         breaks = c(1,10,100,Inf),
+#'         decimals = c(2,2,1,0))
 #'
 
-tbl_val <- function (
+tbl_val <- function(
   x,
+  round_half_to_even = FALSE,
   breaks = c(1, 10, Inf),
   decimals = c(2, 1, 0),
   miss_replace = '--',
@@ -105,6 +85,87 @@ tbl_val <- function (
   trim = TRUE
 ) {
 
+  check_call(
+    match.call(),
+    expected = list(
+      'x' = list(
+        type = 'numeric',
+        length = NULL,
+        lwr = NULL,
+        upr = NULL
+      ),
+      'round_half_to_even' = list(
+        type = 'logical',
+        length = 1,
+        lwr = NULL,
+        upr = NULL
+      ),
+      'breaks' = list(
+        type = 'numeric',
+        length = c(1, 3, length(decimals)),
+        lwr = 0,
+        upr = NULL
+      ),
+      'decimals' = list(
+        type = 'numeric',
+        length = c(1, 3, length(breaks)),
+        lwr = -20,
+        upr = 20
+      ),
+      'miss_replace' = list(
+        type = 'character',
+        length = 1,
+        lwr = NULL,
+        upr = NULL
+      ),
+      'big_mark' = list(
+        type = 'character',
+        length = 1,
+        lwr = NULL,
+        upr = NULL
+      ),
+      'big_interval' = list(
+        type = 'numeric',
+        length = 1,
+        lwr = NULL,
+        upr = NULL
+      ),
+      'small_mark' = list(
+        type = 'character',
+        length = 1,
+        lwr = NULL,
+        upr = NULL
+      ),
+      'small_interval' = list(
+        type = 'numeric',
+        length = 1,
+        lwr = NULL,
+        upr = NULL
+      ),
+      'decimal_mark' = list(
+        type = 'character',
+        length = 1,
+        lwr = NULL,
+        upr = NULL
+      ),
+      'zero_print' = list(
+        type = c('logical', 'character'),
+        length = 1,
+        lwr = NULL,
+        upr = NULL
+      ),
+      'trim' = list(
+        type = 'logical',
+        length = 1,
+        lwr = NULL,
+        upr = NULL
+      )
+    )
+  )
+
+  # recycle decimals if length is 1
+  if(length(decimals) == 1) decimals <- rep(decimals, length(breaks))
+
   if (length(breaks) != length(decimals))
     stop('breaks and decimals should have equal length', call. = FALSE)
 
@@ -115,12 +176,12 @@ tbl_val <- function (
 
   if (is.integer(x)) return(format(x, big.mark = big_mark))
 
-  if(!(all(breaks>0))) stop("all breaks should be > 0", call. = FALSE)
-
   if(any(diff(breaks) < 0))
     stop("breaks should be strictly monotonically increasing", call. = FALSE)
 
-  out <- rep(miss_replace, vctrs::vec_size(x))
+  ..round <- if(round_half_to_even) base::round else .round
+
+  out <- rep(miss_replace, length(x))
 
   if (all(is.na(x))) return(out)
 
@@ -133,7 +194,7 @@ tbl_val <- function (
   # rounding to 0 decimals, 9.5 should be considered as if it were 10
   # rounding to 1 decimals, 9.95 should be considered as if it were 10
   # rounding to 2 decimals, 9.995 should be considered as if it were 10
-  # in general...
+  # in general the formula for bump down value is (1/2) / 10^decimals
 
   bump_down <- 0.5 / (10^decimals)
 
@@ -162,18 +223,22 @@ tbl_val <- function (
     ob <- out_breaks[[i]]
 
     if(!is_empty(ob)){
-      out[ob] <- .round(x[ob], digits = decimals[i]) %>%
-        format(
-          nsmall = safe_nsmall(decimals[i]),
-          big.mark = big_mark,
-          big.interval = big_interval,
-          small.mark = small_mark,
-          small.interval = small_interval,
-          decimal.mark = decimal_mark,
-          zero.print = zero_print,
-          #justify = justify,
-          trim = trim,
-        )
+
+      ob_rounded <- ..round(x[ob], digits = decimals[i])
+
+      out[ob] <- format(
+        ob_rounded,
+        nsmall = safe_nsmall(decimals[i]),
+        big.mark = big_mark,
+        big.interval = big_interval,
+        small.mark = small_mark,
+        small.interval = small_interval,
+        decimal.mark = decimal_mark,
+        zero.print = zero_print,
+        #justify = justify,
+        trim = trim,
+      )
+
     }
 
   }
@@ -181,6 +246,7 @@ tbl_val <- function (
   out
 
 }
+
 
 
 

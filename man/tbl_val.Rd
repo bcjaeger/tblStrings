@@ -6,6 +6,7 @@
 \usage{
 tbl_val(
   x,
+  round_half_to_even = FALSE,
   breaks = c(1, 10, Inf),
   decimals = c(2, 1, 0),
   miss_replace = "--",
@@ -20,6 +21,13 @@ tbl_val(
 }
 \arguments{
 \item{x}{a vector of numeric values}
+
+\item{round_half_to_even}{a logical value. If \code{TRUE}, then when the
+fractional part of \code{x} is half-way between two rounding boundaries,
+it will be rounded to the even boundary nearest to x. For example,
++23.5 becomes +24, as does +24.5; while −23.5 becomes −24,
+as does −24.5. If \code{FALSE}, halves are automatically rounded to
+the boundary with highest absolute value.}
 
 \item{breaks}{a positive, monotonically increasing numeric vector
 designating rounding boundaries. With \code{breaks = c(1, 10, 100, 1000)}
@@ -48,11 +56,11 @@ for numbers after (hence small) the decimal.}
 \item{decimal_mark}{the character to be used to indicate the numeric
 decimal point.}
 
-\item{zero_print}{logical, character string or NULL specifying if and
-how zeros should be formatted specially. Useful for pretty printing
-'sparse' objects.}
+\item{zero_print}{a logical value, character string or NULL value
+specifying if and how zeros should be formatted specially.
+Useful for pretty printing 'sparse' objects.}
 
-\item{trim}{logical; if \code{FALSE}, logical, numeric and complex values
+\item{trim}{a logical value; if \code{FALSE}, logical, numeric and complex values
 are right-justified to a common width: if \code{TRUE} the leading blanks
 for justification are suppressed.}
 }
@@ -62,15 +70,26 @@ a character vector with rounded values
 \description{
 Table value rounding
 }
+\details{
+Using \code{round_half_to_even = TRUE} minimizes the expected
+error when summing over rounded figures, even when the inputs are
+mostly positive or mostly negative. This variant of the
+round-to-nearest method is also called convergent rounding,
+statistician's rounding, Dutch rounding, Gaussian rounding,
+odd–even rounding, or bankers' rounding.
+}
 \note{
 \code{tbl_val} converts \code{NA} values to non-missing character values.
 This is because different R packages that tabulate numbers handle
-true \code{NA} values differently, but handle character values the same way.
+true \code{NA} values differently, but handle character values the same
+way.
 }
 \examples{
 
 tbl_val( c(0.1234, 1.234, 12.34, 123.4, 1234) )
 
-tbl_val( c(0.995, 9.995, 99.95, 2003.5), c(1,10,100,Inf), c(2,2,1,0) )
+tbl_val(x = c(0.995, 9.995, 99.95, 2003.5),
+        breaks = c(1,10,100,Inf),
+        decimals = c(2,2,1,0))
 
 }

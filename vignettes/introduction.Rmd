@@ -17,3 +17,16 @@ knitr::opts_chunk$set(
 ```{r setup}
 library(tblStrings)
 ```
+
+# Why should you use `tblStrings`?
+
+If you have ever dealt with academic journals or other publishers (or colleagues with strong opinions), you may have been asked to round numbers in your tables or in the main text of your article with some very specific guidelines. `tblStrings` acts as a shortcut for you to follow those guidelines without manually inspecting every number in your tables. 
+
+## Rounding based on magnitude
+
+When data are presented, 
+
+## 
+
+# How do you use `tblStrings`?
+
